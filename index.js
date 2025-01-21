@@ -2,23 +2,31 @@ const express = require('express');
 const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
-// Filter console warnings
-const originalConsoleWarn = console.warn;
-console.warn = (message) => {
-    if (!message.includes('specific warning keyword')) {
-            originalConsoleWarn(message);
-                }
-                };
+const app = express();
+const PORT = 3000;
 
-                const app = express();
-                app.use(cors());
+// Enable CORS for all routes
+app.use(cors());
 
-                app.use('/proxy', createProxyMiddleware({
-                    target: 'https://maps.googleapis.com',
-                        changeOrigin: true,
-                            pathRewrite: {
-                                    '^/proxy': '', // Removes '/proxy' prefix
-                                        },
-                                        }));
+// Proxy endpoint to handle requests
+app.use('/proxy', createProxyMiddleware({
+    target: '', // Set dynamically from frontend
+    changeOrigin: true,
+    secure: false,
+    onProxyReq: (proxyReq, req) => {
+        const targetUrl = req.query.url;
+        if (targetUrl) {
+            proxyReq.path = new URL(targetUrl).pathname;
+        }
+    },
+    router: (req) => req.query.url || '',
+    logLevel: 'debug',
+}));
 
-                                        app.listen(8080, () => console.log('CORS Proxy running on http://localhost:8080'));
+app.get('/', (req, res) => {
+    res.send('CORS Proxy is running. Use /proxy?url=YOUR_TARGET_URL');
+});
+
+app.listen(PORT, () => {
+    console.log(`CORS Proxy is running on http://localhost:${PORT}`);
+});
