@@ -17,17 +17,33 @@ app.use('/proxy', createProxyMiddleware({
     changeOrigin: true,
     secure: false,
     onProxyReq: (proxyReq, req) => {
-        const targetUrl = req.query.url;
-        if (targetUrl) {
-            proxyReq.path = new URL(targetUrl).pathname;
+        try {
+            const targetUrl = req.query.url;
+            if (targetUrl) {
+                proxyReq.path = new URL(targetUrl).pathname;
+            }
+        } catch (error) {
+            console.error('Error in onProxyReq:', error.message);
         }
     },
-    router: (req) => req.query.url || '',
+    router: (req) => {
+        try {
+            return req.query.url || '';
+        } catch (error) {
+            console.error('Error in router:', error.message);
+            return ''; // Fallback to an empty target
+        }
+    },
     logLevel: 'debug',
 }));
 
 app.get('/', (req, res) => {
     res.send('CORS Proxy is running. Use /proxy?url=YOUR_TARGET_URL');
+});
+
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err.message);
+    res.status(500).send('An unexpected error occurred.');
 });
 
 app.listen(PORT, () => {
