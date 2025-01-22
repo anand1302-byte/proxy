@@ -9,6 +9,13 @@ const PORT = 3000;
 // Enable CORS for all routes
 app.use(cors());
 
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS'); // Allowed methods
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allowed headers
+    next();
+});
+
 console.warn = function() {};
 
 // Proxy endpoint to handle requests
