@@ -26,6 +26,8 @@ app.use('/proxy', createProxyMiddleware({
     logLevel: 'debug',
 }));
 
+Object.assign();
+
 app.get('/', (req, res) => {
     res.send('CORS Proxy is running. Use /proxy?url=YOUR_TARGET_URL');
 });
