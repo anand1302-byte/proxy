@@ -1,8 +1,12 @@
 const express = require("express");
 const axios = require("axios");
+const cors = require("cors");
 
 const app = express();
 const PORT = 3000;
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Proxy route
 app.get("/proxy", async (req, res) => {
