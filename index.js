@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const { URL } = require('url'); // Import URL constructor
 
 const app = express();
 const PORT = 3000;
@@ -28,7 +29,6 @@ app.use('/proxy', createProxyMiddleware({
 app.get('/', (req, res) => {
     res.send('CORS Proxy is running. Use /proxy?url=YOUR_TARGET_URL');
 });
-
 
 app.listen(PORT, () => {
     console.log(`CORS Proxy is running on http://localhost:${PORT}`);
