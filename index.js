@@ -1,6 +1,6 @@
-const express = require("express");
-const axios = require("axios");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 const PORT = 3000;
@@ -8,25 +8,28 @@ const PORT = 3000;
 // Enable CORS for all routes
 app.use(cors());
 
-// Proxy route
-app.get("/proxy", async (req, res) => {
-  const targetUrl = req.query.url; // URL jo aap access karna chahte hain
-  
-  if (!targetUrl) {
-    return res.status(400).json({ error: "Please provide a URL as a query parameter" });
-  }
+console.warn = function() {};
 
-  try {
-    const response = await axios.get(targetUrl);
+// Proxy endpoint to handle requests
+app.use('/proxy', createProxyMiddleware({
+    target: '', // Set dynamically from frontend
+    changeOrigin: true,
+    secure: false,
+    onProxyReq: (proxyReq, req) => {
+        const targetUrl = req.query.url;
+        if (targetUrl) {
+            proxyReq.path = new URL(targetUrl).pathname;
+        }
+    },
+    router: (req) => req.query.url || '',
+    logLevel: 'debug',
+}));
 
-    // JSON format response
-    res.json(response.data);
-  } catch (error) {
-    console.error("Error while fetching data:", error.message);
-    res.status(500).json({ error: "Failed to fetch data from the target URL" });
-  }
+app.get('/', (req, res) => {
+    res.send('CORS Proxy is running. Use /proxy?url=YOUR_TARGET_URL');
 });
 
+
 app.listen(PORT, () => {
-  console.log(`Proxy server is running on http://localhost:${PORT}`);
+    console.log(`CORS Proxy is running on http://localhost:${PORT}`);
 });
